@@ -2,97 +2,49 @@
 #include<stdlib.h>
 #include<string.h>
 
-typedef struct {
+struct Item1 { //struct with node functionality
     char *value;
     int weight;
-    struct Item* next;
-    struct Item* prev;
-}Item1;
-//test git
-void getAnInput();
+    struct Item1* next;
+    struct Item1* prev;
+};
+
+
+
+void getAnInput(int* sackWeight); // getting an input
+
+int translateValue(char*);        // translating string value into int
+void sortedInsert(struct Item1**,struct Item1*);
+double calcItemValue(int, int);  // calculate value/weight
 
 //void printArray(Item1*, int);
-int translateValue(char*);
 //void releaseArray(Item1**, int);
-
-void CalcAndPrint();
-
-Item1* head;
-
-
-
-/*struct Node  {
-    int data;
-    struct Node* next;
-    struct Node* prev;
-};*/
-
-
-Item1* head; // global variable - pointer to head node.
+void CalcAndPrint(int);
+struct Item1* head; // global variable - pointer to head node.
 
 //Creates a new Node and returns pointer to it. CHECK IT !
-Item1* GetNewNode(int weight, char *value) {
-    Item1* newNode = (Item1*)malloc(sizeof(Item1));
+struct Item1* GetNewNode(int weight, char *value) {
+    struct Item1* newNode = (struct Item1*)malloc(sizeof(struct Item1));
 
     newNode->weight = weight;
-    strcpy(newNode->value, *value);
+    strcpy(newNode->value, value); // might not work. Check if allocation is needed
     newNode->prev = NULL;
     newNode->next = NULL;
     return newNode;
 }
 
 
-//Inserts a Node at head of doubly linked list
-void InsertAtHead(int weight, char *value) { // check if works !
-    Item1* newNode = GetNewNode(weight, *value);
-    if(head == NULL) {
-        head = newNode;
-        return;
-    }
-    head->prev = newNode;
-    newNode->next = head;
-    head = newNode;
-}
-
-
-//Inserts a Node at tail of Doubly linked list
-void InsertAtTail(int weight, char *value) { //add str copy
-    Item1* temp = head;
-    Item1* newNode = GetNewNode(weight, *value);
-    if(head == NULL) {
-        head = newNode;
-        return;
-    }
-    while(temp->next != NULL) temp = temp->next; // Go To last Node
-    temp->next = newNode;
-    newNode->prev = temp;
-}
-
-
-//Prints all the elements in linked list in forward traversal order
-/*void Print() {
-    Item1* temp = head;
-    while(temp != NULL) {
-        printf("%d ",temp->weight);
-        temp = temp->next;
-    }
-    printf("\n");
-}*/
-
-
-
-
 int main() { // NEEDS EDIT
-    getAnInput();
-    void CalcAndPrint();
+    int sackWeight = 0;
+    getAnInput(&sackWeight);
+    CalcAndPrint(sackWeight);
     return 0;
 }
 
 
-void getAnInput() { // check if **node is needed
+void getAnInput(int* sackWeight) { // check if **node is needed
     int weight = 0;
     char tempstr[256]; //for the value str
-    int headChecker = 0;
     char *aloStr;
 
     for (;;) {
@@ -113,41 +65,59 @@ void getAnInput() { // check if **node is needed
             }
 
             printf("value as num is: %d\n", translateValue(aloStr)); // print the value in numbers
-
-            if(headChecker == 0) { //check if it's the first item. If so, start a new node
-                GetNewNode(weight, aloStr);
-                headChecker++;
-            }
-            else {
-                InsertAtTail(weight, aloStr); // insert at the end of the node
-            }
+            sortedInsert(&head, (GetNewNode(weight, aloStr))); // check if &head is needed
         }
+    }
+    printf("Please entere the weight of knapsack: "); // taking a weight input
+    scanf("%d", sackWeight);
+}
+
+double calcItemValue(int value, int weight) {
+    double res = 0;
+    res = value/weight;
+    return res;
+}
+
+void sortedInsert(struct Item1** head_ref,struct Item1* new_node) { // FIX IT !!!!!!!!!!
+    struct Item1* current;
+
+/* Special case for the head end */
+    if (*head_ref == NULL || calcItemValue(translateValue((*head_ref)->value), (*head_ref)->weight) >= calcItemValue(translateValue(new_node->value), new_node->weight)) {
+        new_node->next = *head_ref;
+        *head_ref = new_node;
+    }
+    else
+    {
+/* Locate the node before the point of insertion */
+        current = *head_ref;
+
+        while (current->next!=NULL && (calcItemValue(translateValue(current->next->value), current->next->weight)) < calcItemValue(translateValue(new_node->value), new_node->weight)) {
+            current = current->next;
+        }
+        new_node->next = current->next;
+        current->next = new_node;
     }
 }
 
-void CalcAndPrint() {
-        Item1* temp = head;
-        while(temp != NULL) {
-            printf("%d ",temp->weight);
-            temp = temp->next;
-        }
-        printf("\n");
-}
 
-/*    int i;
-    printf("num_of_items: %d\n", length); //printing the array. sending the string for translation before printing
-    for (i = 0; i < length; i++) {
-        printf("ary[%d].value: %d, ary[%d].weight: %d\n", i, translateValue(((ary)[i]).value), i, ary[i].weight);
-    }*/
-}
-/*
-void releaseArray(Item1** item, int length) { //release the memory
-    for (int i = 0; i < length; i++) {
-        free((((*item)[i]).value));
-        ((*item)[i]).weight = NULL;
+void CalcAndPrint(int sackWeight) { // will
+    struct Item1* temp = head;
+    int frac = 0;
+    while(temp != NULL) {
+        if(sackWeight >= temp->weight)
+            frac = 1;
+        else {
+            frac = (temp->weight / sackWeight);
+            sackWeight = 0;
+            printf("Added to the knapsack: %d, with fraction of: %if, remain space is: %d\n", translateValue(temp->value), frac, sackWeight);
+                   break;
+        }
+
+        sackWeight-=temp->weight;
+        printf("Added to the knapsack: %d, with fraction of: %if, remain space is: %d\n", translateValue(temp->value), frac, sackWeight);
+        temp = temp->next;
     }
-    free(*item);
-}*/
+}
 
 int translateValue(char *value) { //translating the string into a number
     int i = 0;
@@ -159,6 +129,45 @@ int translateValue(char *value) { //translating the string into a number
     }
     return temp;
 }
+
+
+//Prints all the elements in linked list in forward traversal order
+/*void Print() {
+    Item1* temp = head;
+    while(temp != NULL) {
+        printf("%d ",temp->weight);
+        temp = temp->next;
+    }
+    printf("\n");
+}*/
+/*
+
+void CalcAndPrint() { // will
+        Item1* temp = head;
+        while(temp != NULL) {
+            printf("%d ",temp->weight);
+            temp = temp->next;
+        }
+        printf("\n");
+}
+*/
+
+/*    int i;
+    printf("num_of_items: %d\n", length); //printing the array. sending the string for translation before printing
+    for (i = 0; i < length; i++) {
+        printf("ary[%d].value: %d, ary[%d].weight: %d\n", i, translateValue(((ary)[i]).value), i, ary[i].weight);
+    }*/
+//}
+/*
+void releaseArray(Item1** item, int length) { //release the memory
+    for (int i = 0; i < length; i++) {
+        free((((*item)[i]).value));
+        ((*item)[i]).weight = NULL;
+    }
+    free(*item);
+}*/
+
+
 
 /*//Prints all elements in linked list in reverse traversal order.
 void ReversePrint() {
@@ -177,73 +186,7 @@ void ReversePrint() {
     printf("\n");
 }*/
 
-void sortedInsert(Item1** head_ref, Item1* newNode)
-{
-    struct Node* current;
 
-    // if list is empty
-    if (*head_ref == NULL)
-        *head_ref = newNode;
-
-        // if the node is to be inserted at the beginning
-        // of the doubly linked list
-    else if ((*head_ref)->data >= newNode->data) {
-        newNode->next = *head_ref;
-        newNode->next->prev = newNode;
-        *head_ref = newNode;
-    }
-
-    else {
-        current = *head_ref;
-
-        // locate the node after which the new node
-        // is to be inserted
-        while (current->next != NULL &&
-               current->next->data < newNode->data)
-            current = current->next;
-
-        /*Make the appropriate links */
-
-        newNode->next = current->next;
-
-        // if the new node is not inserted
-        // at the end of the list
-        if (current->next != NULL)
-            newNode->next->prev = newNode;
-
-        current->next = newNode;
-        newNode->prev = current;
-    }
-}
-
-// function to sort a doubly linked list using insertion sort
-void insertionSort(Item1** head_ref)
-{
-    // Initialize 'sorted' - a sorted doubly linked list
-    struct Node* sorted = NULL;
-
-    // Traverse the given doubly linked list and
-    // insert every node to 'sorted'
-    struct Node* current = *head_ref;
-    while (current != NULL) {
-
-        // Store next for next iteration
-        struct Node* next = current->next;
-
-        // removing all the links so as to create 'current'
-        // as a new node for insertion
-        current->prev = current->next = NULL;
-
-        // insert current in 'sorted' doubly linked list
-        sortedInsert(&sorted, current);
-
-        // Update current
-        current = next;
-    }
-
-    // Update head_ref to point to sorted doubly linked list
-    *head_ref = sorted;
-}
 
 
 
