@@ -110,7 +110,8 @@ void CalcAndPrint(int sackWeight) { // will
         if(sackWeight >= temp->weight)
             frac = 1;
         else {
-            frac = (temp->weight / sackWeight);
+            frac = ((double)sackWeight / temp->weight);
+
             sackWeight = 0;
             printf("Added to the knapsack: %d, with fraction of: %f, remain space is: %d\n", translateValue(temp->value), frac, sackWeight);
                    break;
