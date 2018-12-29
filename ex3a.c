@@ -6,7 +6,6 @@ struct Item1 { //struct with node functionality
     char *value;
     int weight;
     struct Item1* next;
-    struct Item1* prev;
 };
 
 
@@ -27,8 +26,15 @@ struct Item1* GetNewNode(int weight, char *value) {
     struct Item1* newNode = (struct Item1*)malloc(sizeof(struct Item1));
 
     newNode->weight = weight;
-    strcpy(newNode->value, value); // might not work. Check if allocation is needed
-    newNode->prev = NULL;
+
+    char* aloStr = (char*)malloc((strlen(value) + 1) * sizeof(char)); // allocate value with the right input size
+
+    if (aloStr == NULL) { // checking if allocation succeed
+        printf("Cannot allocate initial memory for data\n");
+        exit(1);
+    }
+
+    newNode->value = aloStr;
     newNode->next = NULL;
     return newNode;
 }
@@ -57,15 +63,10 @@ void getAnInput(int* sackWeight) { // check if **node is needed
             scanf("%s", tempstr);
             printf("\n");
 
-            aloStr = (char*)malloc((strlen(tempstr) + 1) * sizeof(char)); // allocate value with the right input size
 
-            if (aloStr == NULL) { // checking if allocation succeed
-                printf("Cannot allocate initial memory for data\n");
-                exit(1);
-            }
 
-            printf("value as num is: %d\n", translateValue(aloStr)); // print the value in numbers
-            sortedInsert(&head, (GetNewNode(weight, aloStr))); // check if &head is needed
+            printf("value as num is: %d\n", translateValue(tempstr)); // print the value in numbers
+            sortedInsert(&head, (GetNewNode(weight, tempstr))); // check if &head is needed
         }
     }
     printf("Please entere the weight of knapsack: "); // taking a weight input
