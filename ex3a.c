@@ -69,7 +69,7 @@ void getAnInput(int* sackWeight) { // check if **node is needed
             sortedInsert(&head, (GetNewNode(weight, tempstr))); // check if &head is needed
         }
     }
-    printf("Please entere the weight of knapsack: "); // taking a weight input
+    printf("Please enter the weight of knapsack: "); // taking a weight input
     scanf("%d", sackWeight);
 }
 
@@ -104,24 +104,29 @@ void sortedInsert(struct Item1** head_ref,struct Item1* new_node) { // FIX IT !!
 void CalcAndPrint(int sackWeight) { // will
     struct Item1* temp = head;
     double frac = 0;
+    int maximumGreedy = 0;
 
     while(temp != NULL) {
 //        printf("The current translated VALUE is: &d", translateValue(temp->value));
-        if(sackWeight >= temp->weight)
+        if(sackWeight >= temp->weight) {
             frac = 1;
+            maximumGreedy += translateValue(temp->value);
+        }
+
         else {
             frac = ((double)sackWeight / temp->weight);
-
             sackWeight = 0;
             printf("Added to the knapsack: %d, with fraction of: %f, remain space is: %d\n", translateValue(temp->value), frac, sackWeight);
+            maximumGreedy += (translateValue(temp->value) * frac);
                    break;
         }
 
         sackWeight-=temp->weight;
         printf("Added to the knapsack: %d, with fraction of: %d, remain space is: %d\n", translateValue(temp->value), (int)frac, sackWeight);
-        frac = 0;
+
         temp = temp->next;
     }
+    printf("Maximum value Greedy solution: %d", maximumGreedy);
 }
 
 int translateValue(char *value) { //translating the string into a number
