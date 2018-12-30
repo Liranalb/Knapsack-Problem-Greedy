@@ -5,26 +5,34 @@
 struct Item1 { //struct with node functionality
     char *value;
     int weight;
-    struct Item1* next;
 };
+
+struct Node { //struct with node functionality
+    struct Item1 *data;
+    struct Node* next;
+};
+
+
+
 
 
 void getAnInput(int* sackWeight); // getting an input
 
 int translateValue(char*);        // translating string value into int
-void sortedInsert(struct Item1**,struct Item1*);
+void sortedInsert(struct Node**,struct Node*);
 double calcItemValue(int, int);  // calculate value/weight
 void freeUpMem();
 //void printArray(Item1*, int);
 //void releaseArray(Item1**, int);
 void CalcAndPrint(int);
-struct Item1* head; // global variable - pointer to head node.
+struct Node* head; // global variable - pointer to head node.
 
 //Creates a new Node and returns pointer to it. CHECK IT !
 struct Item1* GetNewNode(int weight, char *value) {
-    struct Item1* newNode = (struct Item1*)malloc(sizeof(struct Item1));
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = (struct Item1*)malloc(sizeof(struct Item1));
 
-    newNode->weight = weight;
+    newNode->data->weight = weight;
 
     char* aloStr = (char*)malloc((strlen(value) + 1) * sizeof(char)); // allocate value with the right input size
     if (aloStr == NULL) { // checking if allocation succeed
@@ -35,7 +43,7 @@ struct Item1* GetNewNode(int weight, char *value) {
     strcpy(aloStr, value);
 
 //    printf("the temp string is: %s\n", aloStr);
-    newNode->value = aloStr;
+    newNode->data->value = aloStr;
 
 //    printf("the newNode->value string is: %s\n", newNode->value);
     newNode->next = NULL;
@@ -80,11 +88,11 @@ double calcItemValue(int value, int weight) {
     return res;
 }
 
-void sortedInsert(struct Item1** head_ref,struct Item1* new_node) { // FIX IT !!!!!!!!!!
-    struct Item1* current;
+void sortedInsert(struct Node** head_ref,struct Node* new_node) { // FIX IT !!!!!!!!!!
+    struct Node* current;
 
 /* Special case for the head end */
-    if (*head_ref == NULL || calcItemValue(translateValue((*head_ref)->value), (*head_ref)->weight) <= calcItemValue(translateValue(new_node->value), new_node->weight)) {
+    if (*head_ref == NULL || calcItemValue(translateValue((*head_ref)->data->value), (*head_ref)->data->weight) <= calcItemValue(translateValue(new_node->data->value), new_node->data->weight)) {
         new_node->next = *head_ref;
         *head_ref = new_node;
     }
@@ -93,7 +101,7 @@ void sortedInsert(struct Item1** head_ref,struct Item1* new_node) { // FIX IT !!
 /* Locate the node before the point of insertion */
         current = *head_ref;
 
-        while (current->next!=NULL && (calcItemValue(translateValue(current->next->value), current->next->weight)) > calcItemValue(translateValue(new_node->value), new_node->weight)) {
+        while (current->next!=NULL && (calcItemValue(translateValue(current->next->data->value), current->next->data->weight)) > calcItemValue(translateValue(new_node->data->value), new_node->data->weight)) {
             current = current->next;
         }
         new_node->next = current->next;
@@ -101,10 +109,11 @@ void sortedInsert(struct Item1** head_ref,struct Item1* new_node) { // FIX IT !!
     }
 }
 void freeUpMem() {
-    struct Item1* temp = head;
+    struct Node* temp = head;
     while(temp != NULL) {
         head = head->next;
-        free(temp->value);
+        free(temp->data->value);
+        free(temp->data);
         free(temp);
         temp = head;
     }
@@ -115,27 +124,27 @@ void freeUpMem() {
 
 
 void CalcAndPrint(int sackWeight) { // will
-    struct Item1* temp = head;
+    struct Node* temp = head;
     double frac = 0;
     int maximumGreedy = 0;
 
     while(temp != NULL) {
 //        printf("The current translated VALUE is: &d", translateValue(temp->value));
-        if(sackWeight >= temp->weight) {
+        if(sackWeight >= temp->data->weight) {
             frac = 1;
-            maximumGreedy += translateValue(temp->value);
+            maximumGreedy += translateValue(temp->data->value);
         }
 
         else {
-            frac = ((double)sackWeight / temp->weight);
+            frac = ((double)sackWeight / temp->data->weight);
             sackWeight = 0;
-            printf("Added to the knapsack: %d, with fraction of: %f, remain space is: %d\n", translateValue(temp->value), frac, sackWeight);
-            maximumGreedy += (translateValue(temp->value) * frac);
+            printf("Added to the knapsack: %d, with fraction of: %f, remain space is: %d\n", translateValue(temp->data->value), frac, sackWeight);
+            maximumGreedy += (translateValue(temp->data->value) * frac);
                    break;
         }
 
-        sackWeight-=temp->weight;
-        printf("Added to the knapsack: %d, with fraction of: %d, remain space is: %d\n", translateValue(temp->value), (int)frac, sackWeight);
+        sackWeight-=temp->data->weight;
+        printf("Added to the knapsack: %d, with fraction of: %d, remain space is: %d\n", translateValue(temp->data->value), (int)frac, sackWeight);
 
         temp = temp->next;
     }
