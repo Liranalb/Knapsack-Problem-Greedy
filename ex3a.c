@@ -14,7 +14,7 @@ void getAnInput(int* sackWeight); // getting an input
 int translateValue(char*);        // translating string value into int
 void sortedInsert(struct Item1**,struct Item1*);
 double calcItemValue(int, int);  // calculate value/weight
-
+void freeUpMem();
 //void printArray(Item1*, int);
 //void releaseArray(Item1**, int);
 void CalcAndPrint(int);
@@ -47,6 +47,7 @@ int main() { // NEEDS EDIT
     int sackWeight = 0;
     getAnInput(&sackWeight);
     CalcAndPrint(sackWeight);
+    freeUpMem();
     return 0;
 }
 
@@ -99,6 +100,18 @@ void sortedInsert(struct Item1** head_ref,struct Item1* new_node) { // FIX IT !!
         current->next = new_node;
     }
 }
+void freeUpMem() {
+    struct Item1* temp = head;
+    while(temp != NULL) {
+        head = head->next;
+        free(temp->value);
+        free(temp);
+        temp = head;
+    }
+}
+
+
+
 
 
 void CalcAndPrint(int sackWeight) { // will
